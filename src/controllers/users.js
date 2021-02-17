@@ -9,6 +9,11 @@ exports.getAllUsers = async (req, res) => {
   }
 };
 
+
+exports.getMyProfile =  async (req, res) => {
+  res.status(200).send(req.user)
+}
+
 exports.addUser = async (req, res) => {
   try {
     const user = new User(req.body);
@@ -47,9 +52,21 @@ exports.deleteUser = async (req, res) => {
 exports.login = async (req, res) => {
   try {
     const user = User.findByCredentials(req.body.email, req.body.password);
-    const token = user.generateAuthToken();
+    const token = await user.generateAuthToken();
     res.status(200).send({ user, token });
   } catch (error) {
     res.status(400).send({ message: "Unable to Login" });
   }
 };
+
+exports.logout = async (req, res) => {
+  try {
+      req.user.tokens=req.user.tokens.filter((tokenObj)=>{
+      return tokenObj.token !==req.token
+    })
+    await req.user.save();
+    res.status(200).send({message: "loged out"})
+  }catch (errro){
+
+  }
+}
